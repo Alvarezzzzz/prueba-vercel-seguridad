@@ -23,9 +23,9 @@
             <h1>Gestión de Usuarios</h1>
             <p>Gestiona usuarios, roles y permisos del sistema.</p>
           </div>
-          <button class="btn-añadir">
+          <a href="/seguridad/usuarios/crear" class="btn-añadir">
             <i class="fa-solid fa-plus"></i> Añadir Nuevo Usuario
-          </button>
+          </a>
         </header>
 
         <div class="contenedor-busqueda">
@@ -49,8 +49,10 @@
               <tr>
                 <td>
                   <div class="info-usuario">
-                    <span class="nombre">Alex Johnson</span>
-                    <span class="correo">alex.j@ejemplo.com</span>
+                    <a href="/seguridad/usuarios/editar/1" >
+                      <span class="nombre">Alex Johnson</span>
+                      <span class="correo">alex.j@ejemplo.com</span>
+                    </a>
                   </div>
                 </td>
                 <td>
@@ -178,8 +180,10 @@
                         <tr>
                             <td>
                                 <div class="info-usuario">
-                                    <span class="nombre">${user.name} ${user.lastName}</span>
-                                    <span class="correo">${user.email}</span>
+                                    <a href="/seguridad/usuarios/editar/${user.id}">
+                                      <span class="nombre">${user.name} ${user.lastName}</span>
+                                      <span class="correo">${user.email}</span>  
+                                    </a>
                                 </div>
                             </td>
                             <td>
@@ -260,15 +264,26 @@
 
             // 7. Funciones globales para los botones de acción (placeholder)
             window.editarUsuario = (id) => {
-                console.log("Editando usuario ID:", id);
-                // Aquí podrías redirigir o abrir un modal
-                // window.location.href = `/seguridad/usuarios/editar/${id}`;
+                window.location.href = `/seguridad/usuarios/editar/${id}`;
             };
 
-            window.eliminarUsuario = (id) => {
+            window.eliminarUsuario = async (id) => {
                 if(confirm("¿Estás seguro de eliminar este usuario?")) {
-                    console.log("Eliminando usuario ID:", id);
-                    // Aquí harías el fetch DELETE a tu API
+                   const httpClient = window.httpSeguridadClient;
+                   const resp = await httpClient(`/api/seguridad/users/${id}`, { method: 'DELETE' });
+                        const notyf = window.seguridad_notyf;
+
+                    if(resp.ok) {
+                        // Refrescar la lista de usuarios después de eliminar
+                        estado.usuarios = estado.usuarios.filter(user => user.id !== id);
+                        estado.usuariosFiltrados = estado.usuariosFiltrados.filter(user => user.id !== id);
+                        renderizarTabla();
+                        renderizarPaginacion();
+                        notyf.success("Usuario eliminado correctamente.");
+                    } else {
+                      const data = await resp.json();
+                      notyf.error(`Error al eliminar usuario: ${data.message || resp.statusText}`);
+                    }
                 }
             };
 

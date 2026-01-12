@@ -18,8 +18,6 @@ function httpSeguridadClient(url, options = {}) {
   return fetch(`${SEGURIDAD_CONFIG.SEGURIDAD_URL_BACKEND}${url}`, {
     ...options,
     headers: finalHeaders,
-  }).then((response) => {
-    return response.json();
   });
 }
 
