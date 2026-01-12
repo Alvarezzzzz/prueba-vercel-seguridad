@@ -1,6 +1,6 @@
 import { Router } from "express";
-import SEGURIDAD_CONFIG from "../config/seguridad.js";
-import { verifyToken } from "../utils/jwt.js";
+import SEGURIDAD_CONFIG from "../../config/seguridad/seguridad.js";
+import { verifyToken } from "../../utils/seguridad/jwt.js";
 
 const URL_BASE_API_SEGURIDAD = SEGURIDAD_CONFIG.URL_BASE_API_SEGURIDAD;
 

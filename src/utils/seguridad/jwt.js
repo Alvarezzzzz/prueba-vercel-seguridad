@@ -1,4 +1,4 @@
-import SEGURIDAD_CONFIG from "../config/seguridad.js";
+import SEGURIDAD_CONFIG from "../../config/seguridad/seguridad.js";
 import jwt from "jsonwebtoken";
 
 const SECRET_JWT = SEGURIDAD_CONFIG.SECRET_JWT_KEY;

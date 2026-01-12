@@ -6,7 +6,7 @@ const SEGURIDAD_CONFIG = {
     process.env.SEGURIDAD_SECRET_JWT_KEY ||
     "default-secret-change-in-production",
   URL_BASE_API_SEGURIDAD:
-    process.env.SEGURIDAD_URL_BASE_API_SEGURIDAD ||
+    process.env.SEGURIDAD_URL_BACKEND ||
     "https://charlotte-seguridad.onrender.com",
 };
 

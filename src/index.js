@@ -2,9 +2,9 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
-import SEGURIDAD_CONFIG from "./config/seguridad.js";
-import createSeguridadRouter from "./routes/seguridad.js";
-import createApiSeguridadRouter from "./routes/apiSeguridad.js";
+import SEGURIDAD_CONFIG from "./config/seguridad/seguridad.js";
+import createSeguridadRouter from "./routes/seguridad/seguridad.js";
+import createApiSeguridadRouter from "./routes/seguridad/apiSeguridad.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
