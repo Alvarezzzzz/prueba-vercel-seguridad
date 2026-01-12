@@ -36,10 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       const errorData = await response.json();
       window.seguridad_notyf.error(
-        // string de varias lineas
-        `
-        const { email, password } = req.body;     const response = await fetch(       ,       {         method: "POST",         headers: {           "Content-Type": "application/json",         },         body: JSON.stringify({ email, password }),       }     );      if (response.ok) {       const data = await response.json();       const token = data.token;       res.cookie("access_token", token, {         httpOnly: true,         secure: true,         sameSite: "Strict",         maxAge: 24 * 60 * 60 * 1000, // 1 day       });       const dataUser = verifyToken(token);       res.json({         success: true,         access_token: token,         user: dataUser,         message: "Login successful",       });     } else {       const error = await response.json();       res.status(401).json({         success: false,         message: error.message || "Credenciales inválidas",       });     }
-      `
+        errorData.message || "Error desconocido en el inicio de sesión."
       );
       console.error("Error en el inicio de sesión:", errorData);
     }
