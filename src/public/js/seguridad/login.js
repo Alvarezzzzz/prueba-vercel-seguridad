@@ -32,7 +32,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const user = data.user;
       localStorage.setItem("access_token", access_token);
       localStorage.setItem("administrative_user", JSON.stringify(user));
-      alert(data.message);
+      window.seguridad_notyf.success(
+        "Inicio de sesión exitoso. Redirigiendo..."
+      );
     } else {
       const errorData = await response.json();
       window.seguridad_notyf.error(
