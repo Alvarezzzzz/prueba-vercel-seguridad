@@ -34,10 +34,10 @@ export const createSeguridadRouter = () => {
       const usuarios = data || [];
       res.render("seguridad/usuarios", { usuarios });
     } catch (error) {
-      console.error("A ocurrido un error en /usuarios: ", error);
+      console.error("Ha ocurrido un error en /usuarios: ", error);
       res.render("seguridad/usuarios", {
         usuarios: [],
-        messagesError: [`A ocurrido un error: ${error.message}`],
+        messagesError: [`Ha ocurrido un error: ${error.message}`],
       });
     }
   });
@@ -52,6 +52,7 @@ export const createSeguridadRouter = () => {
   });
 
   router.get("/roles", async (req, res) => {
+    // Los roles ahora se cargan vía AJAX desde el cliente
     res.render("seguridad/roles");
   });
 
@@ -65,12 +66,38 @@ export const createSeguridadRouter = () => {
   });
 
   router.get("/permisos", async (req, res) => {
-    res.render("seguridad/permisos");
+    try {
+      const access_token = req.cookies.access_token || null;
+      const resp = await fetch(`${apiUrl}/api/seguridad/permissions`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(access_token && { Authorization: `Bearer ${access_token}` }),
+        },
+      });
+
+      if (!resp.ok) {
+        console.error("Error fetching permissions:", resp.statusText);
+        return res.render("seguridad/permisos", {
+          permissions: [],
+          messagesError: ["Error al obtener los permisos: " + resp.statusText],
+        });
+      }
+      const data = await resp.json();
+      const permissions = data || [];
+      res.render("seguridad/permisos", { permissions });
+    } catch (error) {
+      console.error("Ha ocurrido un error en /permisos: ", error);
+      res.render("seguridad/permisos", {
+        permissions: [],
+        messagesError: [`Ha ocurrido un error: ${error.message}`],
+      });
+    }
   });
 
   router.get("/permisos/:id", async (req, res) => {
     const { id } = req.params;
-    res.render("seguridad/verPermiso", { roleId: id });
+    res.render("seguridad/verPermiso", { permissionId: id });
   });
 
   router.get("/restaurante/coordenadas", async (req, res) => {
