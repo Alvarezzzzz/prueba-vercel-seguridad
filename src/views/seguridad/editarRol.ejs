@@ -114,7 +114,7 @@
                                     <tr>
                                         <th class="px-4 py-3">Nombre</th>
                                         <th class="px-4 py-3">Email</th>
-                                        <th class="px-4 py-3 text-right">Acción</th>
+                                        <!-- <th class="px-4 py-3 text-right">Acción</th> -->
                                     </tr>
                                 </thead>
                                 <tbody id="usersTableBody" class="divide-y divide-gray-50"></tbody>
@@ -165,6 +165,7 @@
                     
                     if (response.ok) {
                         const data = await response.json();
+                        console.log(data);
                         let role = Array.isArray(data.role) ? data.role[0] : data.role;
                         
                         document.getElementById('name').value = role.name || '';
@@ -183,10 +184,10 @@
                                 const tr = document.createElement('tr');
                                 tr.innerHTML = `
                                     <td class="px-4 py-3 font-medium">${u.name || u.email}</td>
-                                    <td class="px-4 py-3 text-gray-500">${u.email}</td>
-                                    <td class="px-4 py-3 text-right">
-                                        <button class="text-red-600 hover:underline text-xs">Desasignar</button>
-                                    </td>`;
+                                    <td class="px-4 py-3 text-gray-500">${u.email}</td>`
+                                    // <td class="px-4 py-3 text-right">
+                                    //     <button class="text-red-600 hover:underline text-xs">Desasignar</button>
+                                    // </td>`;
                                 usersBody.appendChild(tr);
                             });
                         } else {
@@ -244,20 +245,67 @@
                 fetchEnum('/api/seguridad/enums/Permission/method')
             ]);
 
+            
+
             const populate = (id, list, current) => {
-                const s = document.getElementById(id);
-                s.innerHTML = '<option disabled>Selecciona...</option>';
-                const items = list.types || list.resources?.Resources || list.methods?.Methods || [];
-                items.forEach(i => {
-                    const opt = document.createElement('option');
-                    opt.value = i; opt.textContent = i;
-                    if(i === current) opt.selected = true;
-                    s.appendChild(opt);
-                });
+                    // determina si current termina con _view
+                    const isView = current?.endsWith('_view') || current === 'View';
+                    const s = document.getElementById(id);
+                    s.innerHTML = '<option disabled>Selecciona...</option>';
+                    // inverte list.types
+                    const items = list.types?.reverse() || ( isView ? list.resources?.Views : list.resources?.Resources ) || ( isView ? list.methods?.View : list.methods?.Methods ) || [];
+                    items.forEach(i => {
+                        const opt = document.createElement('option');
+                        opt.value = i; opt.textContent = i;
+                        if(i === current) opt.selected = true;
+                        s.appendChild(opt);
+                    });
             };
             populate('tipoPermiso', t, perm?.tipo || perm?.type);
             populate('recursoPermiso', r, perm?.recurso || perm?.resource);
             populate('metodoPermiso', m, perm?.metodo || perm?.method);
+
+            // Resource de Views
+            const ResourceViews = r.resources?.Views || [];
+            // Resource de Recursos 
+            const ResourceResources = r.resources?.Resources || [];
+            // Method de Views
+            const MethodViews = m.methods?.View || [];  
+            // Method de Recursos
+            const MethodResources = m.methods?.Methods || [];
+
+            // Agrega eventos a los selectores para que cuando cambie el tipo de permiso, se actualicen los recursos y métodos
+            document.getElementById('tipoPermiso').onchange = (e) => {
+                const type = e.target.value; 
+                const recursoSelect = document.getElementById('recursoPermiso');
+                const metodoSelect = document.getElementById('metodoPermiso');
+                recursoSelect.innerHTML = '<option disabled>Selecciona...</option>';
+                metodoSelect.innerHTML = '<option disabled>Selecciona...</option>';
+                if(type === 'View') {
+                    ResourceViews.forEach(r => {
+                        const opt = document.createElement('option');
+                        opt.value = r; opt.textContent = r;
+                        recursoSelect.appendChild(opt);
+                    });
+                    MethodViews.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m; opt.textContent = m;
+                        metodoSelect.appendChild(opt);
+                    });
+                } else if(type === 'Resource') {
+                    ResourceResources.forEach(r => {
+                        const opt = document.createElement('option');
+                        opt.value = r; opt.textContent = r;
+                        recursoSelect.appendChild(opt);
+                    });
+                    MethodResources.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m; opt.textContent = m;
+                        metodoSelect.appendChild(opt);
+                    });
+                }
+            };
+
         }
 
         function abrirModalCrear() {

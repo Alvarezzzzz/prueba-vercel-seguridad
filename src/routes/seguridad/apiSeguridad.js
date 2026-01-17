@@ -18,7 +18,7 @@ export const createApiSeguridadRouter = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ email, password }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -28,7 +28,7 @@ export const createApiSeguridadRouter = () => {
           httpOnly: true,
           secure: true,
           sameSite: "Strict",
-          maxAge: 24 * 60 * 60 * 1000, 
+          maxAge: 24 * 60 * 60 * 1000,
         });
         const dataUser = verifyToken(token);
         res.json({
@@ -55,12 +55,14 @@ export const createApiSeguridadRouter = () => {
 
   router.get("/roles", async (req, res) => {
     try {
-      const { page = 1, limit = 12, search = '' } = req.query;
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
-      
+      const { page = 1, limit = 12, search = "" } = req.query;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
+
       // Construir URL con parámetros de paginación
       const url = `${URL_BASE_API_SEGURIDAD}/api/seguridad/roles?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
-      
+
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -68,7 +70,6 @@ export const createApiSeguridadRouter = () => {
           ...(access_token && { Authorization: `Bearer ${access_token}` }),
         },
       });
-
       if (response.ok) {
         const data = await response.json();
         res.json({
@@ -78,8 +79,8 @@ export const createApiSeguridadRouter = () => {
             page: parseInt(page),
             limit: parseInt(limit),
             total: data.total || 0,
-            totalPages: Math.ceil((data.total || 0) / parseInt(limit))
-          }
+            totalPages: Math.ceil((data.total || 0) / parseInt(limit)),
+          },
         });
       } else {
         const error = await response.json();
@@ -100,7 +101,9 @@ export const createApiSeguridadRouter = () => {
   router.post("/roles", async (req, res) => {
     try {
       const { name, description, permissions } = req.body;
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
       const response = await fetch(
         `${URL_BASE_API_SEGURIDAD}/api/seguridad/roles`,
         {
@@ -110,7 +113,7 @@ export const createApiSeguridadRouter = () => {
             ...(access_token && { Authorization: `Bearer ${access_token}` }),
           },
           body: JSON.stringify({ name, description, permissions }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -139,16 +142,18 @@ export const createApiSeguridadRouter = () => {
   router.get("/roles/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
       const response = await fetch(
-        `${URL_BASE_API_SEGURIDAD}/api/seguridad/roles/${id}`,
+        `${URL_BASE_API_SEGURIDAD}/api/seguridad/roles/${id}?includeUsers=true`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             ...(access_token && { Authorization: `Bearer ${access_token}` }),
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -173,53 +178,58 @@ export const createApiSeguridadRouter = () => {
     }
   });
 
-
-router.put("/permissions/:id", async (req, res) => {
+  router.put("/permissions/:id", async (req, res) => {
     try {
-        const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
-        const { id } = req.params;
-        const bodyData = req.body;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
+      const { id } = req.params;
+      const bodyData = req.body;
 
-        console.log(`=> Intentando PATCH a API externa para ID: ${id}`);
+      console.log(`=> Intentando PATCH a API externa para ID: ${id}`);
 
-        const response = await fetch(
-            `${URL_BASE_API_SEGURIDAD}/api/seguridad/permissions/${id}`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    ...(access_token && { Authorization: `Bearer ${access_token}` }),
-                },
-                body: JSON.stringify(bodyData),
-            }
-        );
-        const contentType = response.headers.get("content-type");
-        let data = {};
-        if (contentType && contentType.includes("application/json")) {
-            data = await response.json();
-        }
+      const response = await fetch(
+        `${URL_BASE_API_SEGURIDAD}/api/seguridad/permissions/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(access_token && { Authorization: `Bearer ${access_token}` }),
+          },
+          body: JSON.stringify(bodyData),
+        },
+      );
+      const contentType = response.headers.get("content-type");
+      let data = {};
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      }
 
-        if (response.ok) {
-            return res.json({ success: true, message: "Actualizado con éxito" });
-        } else {
-            console.error("Error API Externa:", response.status, data);
-            return res.status(response.status).json({ 
-                success: false, 
-                message: data.message || "La API externa rechazó la actualización" 
-            });
-        }
+      if (response.ok) {
+        return res.json({ success: true, message: "Actualizado con éxito" });
+      } else {
+        console.error("Error API Externa:", response.status, data);
+        return res.status(response.status).json({
+          success: false,
+          message: data.message || "La API externa rechazó la actualización",
+        });
+      }
     } catch (error) {
-        console.error("Error crítico en el Bridge:", error);
-        if (!res.headersSent) {
-            res.status(500).json({ success: false, message: "Error de conexión con la API de seguridad" });
-        }
+      console.error("Error crítico en el Bridge:", error);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: "Error de conexión con la API de seguridad",
+        });
+      }
     }
-});
-
+  });
 
   router.delete("/roles/:id", async (req, res) => {
     try {
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
       const { id } = req.params;
       const response = await fetch(
         `${URL_BASE_API_SEGURIDAD}/api/seguridad/roles/${id}`,
@@ -229,7 +239,7 @@ router.put("/permissions/:id", async (req, res) => {
             "Content-Type": "application/json",
             ...(access_token && { Authorization: `Bearer ${access_token}` }),
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -255,7 +265,9 @@ router.put("/permissions/:id", async (req, res) => {
 
   router.get("/enums/Permission/type", async (req, res) => {
     try {
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
       const response = await fetch(
         `${URL_BASE_API_SEGURIDAD}/api/seguridad/enums/Permission/type`,
         {
@@ -264,7 +276,7 @@ router.put("/permissions/:id", async (req, res) => {
             "Content-Type": "application/json",
             ...(access_token && { Authorization: `Bearer ${access_token}` }),
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -291,7 +303,9 @@ router.put("/permissions/:id", async (req, res) => {
 
   router.get("/enums/Permission/resource", async (req, res) => {
     try {
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
       const response = await fetch(
         `${URL_BASE_API_SEGURIDAD}/api/seguridad/enums/Permission/resource`,
         {
@@ -300,7 +314,7 @@ router.put("/permissions/:id", async (req, res) => {
             "Content-Type": "application/json",
             ...(access_token && { Authorization: `Bearer ${access_token}` }),
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -327,7 +341,9 @@ router.put("/permissions/:id", async (req, res) => {
 
   router.get("/enums/Permission/method", async (req, res) => {
     try {
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
       const response = await fetch(
         `${URL_BASE_API_SEGURIDAD}/api/seguridad/enums/Permission/method`,
         {
@@ -336,7 +352,7 @@ router.put("/permissions/:id", async (req, res) => {
             "Content-Type": "application/json",
             ...(access_token && { Authorization: `Bearer ${access_token}` }),
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -363,7 +379,9 @@ router.put("/permissions/:id", async (req, res) => {
 
   router.get("/permissions", async (req, res) => {
     try {
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
       const response = await fetch(
         `${URL_BASE_API_SEGURIDAD}/api/seguridad/permissions`,
         {
@@ -372,7 +390,7 @@ router.put("/permissions/:id", async (req, res) => {
             "Content-Type": "application/json",
             ...(access_token && { Authorization: `Bearer ${access_token}` }),
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -400,7 +418,9 @@ router.put("/permissions/:id", async (req, res) => {
   router.get("/permissions/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
       const response = await fetch(
         `${URL_BASE_API_SEGURIDAD}/api/seguridad/permissions/${id}`,
         {
@@ -409,7 +429,7 @@ router.put("/permissions/:id", async (req, res) => {
             "Content-Type": "application/json",
             ...(access_token && { Authorization: `Bearer ${access_token}` }),
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -434,105 +454,123 @@ router.put("/permissions/:id", async (req, res) => {
     }
   });
 
- router.post("/permissions", async (req, res) => {
-  try {
-    const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
-    const { name, type, resource, method, roleId } = req.body;
-
-    // Validación previa para evitar enviar basura a la API interna
-    if (!roleId || isNaN(roleId)) {
-      return res.status(400).json({ success: false, message: "ID de rol inválido" });
-    }
-
-    const bodyParaAPI = {
-      name: name.trim(),
-      type: type, 
-      resource: resource,
-      method: method,
-      roleId: Number(roleId)
-    };
-
-    const response = await fetch(`${URL_BASE_API_SEGURIDAD}/api/seguridad/permissions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(access_token && { Authorization: `Bearer ${access_token}` }),
-      },
-      body: JSON.stringify(bodyParaAPI),
-    });
-
-    // IMPORTANTE: Solo leemos el json() UNA VEZ
-    const data = await response.json();
-
-    if (response.ok) {
-      return res.json({ 
-        success: true, 
-        permission: data 
-      });
-    } else {
-      // Si la API interna devuelve errores de validación (Zod/Prisma), los extraemos
-      const msgError = data.errors ? data.errors[0].message : (data.message || "Error en la API");
-      return res.status(response.status).json({ 
-        success: false, 
-        message: msgError 
-      });
-    }
-  } catch (error) {
-    console.error("Error crítico en bridge:", error);
-    // Evitamos que el cliente se quede colgado (ERR_CONNECTION_RESET)
-    if (!res.headersSent) {
-      res.status(500).json({ success: false, message: "Error de conexión con el servicio de seguridad" });
-    }
-  }
-});
-
-// routes/seguridad/apiSeguridad.js
-
-router.put("/permissions/:id", async (req, res) => {
+  router.post("/permissions", async (req, res) => {
     try {
-        const { id } = req.params;
-        const bodyData = req.body;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
+      const { name, type, resource, method, roleId } = req.body;
 
-        // 1. CAPTURAR EL TOKEN: Lo sacamos de los headers que envió tu EJS
-        const authHeader = req.headers.authorization; 
+      // Validación previa para evitar enviar basura a la API interna
+      if (!roleId || isNaN(roleId)) {
+        return res
+          .status(400)
+          .json({ success: false, message: "ID de rol inválido" });
+      }
 
-        console.log(`=> Reenviando PATCH a API externa para ID: ${id}`);
-        
-        if (!authHeader) {
-            console.error("❌ ERROR: El Bridge no recibió ningún token del Frontend");
-        }
+      const bodyParaAPI = {
+        name: name.trim(),
+        type: type,
+        resource: resource,
+        method: method,
+        roleId: Number(roleId),
+      };
 
-        // 2. REENVIAR: Se lo pasamos explícitamente a la API externa
-        const response = await fetch(
-            `${URL_BASE_API_SEGURIDAD}/api/seguridad/permissions/${id}`,
-            {
-                method: "PATCH", // Cambiado a PATCH según tu Postman
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": authHeader // <--- AQUÍ ESTÁ LA CLAVE
-                },
-                body: JSON.stringify(bodyData),
-            }
-        );
+      const response = await fetch(
+        `${URL_BASE_API_SEGURIDAD}/api/seguridad/permissions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(access_token && { Authorization: `Bearer ${access_token}` }),
+          },
+          body: JSON.stringify(bodyParaAPI),
+        },
+      );
 
-        const data = await response.json();
+      // IMPORTANTE: Solo leemos el json() UNA VEZ
+      const data = await response.json();
 
-        if (response.ok) {
-            return res.json({ success: true, message: "Actualizado con éxito" });
-        } else {
-            // Si la API externa dice 403, devolvemos ese mismo error al front
-            console.error(" Error de la API de Seguridad Real:", data);
-            return res.status(response.status).json(data);
-        }
+      if (response.ok) {
+        return res.json({
+          success: true,
+          permission: data,
+        });
+      } else {
+        // Si la API interna devuelve errores de validación (Zod/Prisma), los extraemos
+        const msgError = data.errors
+          ? data.errors[0].message
+          : data.message || "Error en la API";
+        return res.status(response.status).json({
+          success: false,
+          message: msgError,
+        });
+      }
     } catch (error) {
-        console.error(" Error en el Bridge:", error);
-        res.status(500).json({ success: false, message: "Error interno del servidor" });
+      console.error("Error crítico en bridge:", error);
+      // Evitamos que el cliente se quede colgado (ERR_CONNECTION_RESET)
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: "Error de conexión con el servicio de seguridad",
+        });
+      }
     }
-});
+  });
+
+  // routes/seguridad/apiSeguridad.js
+
+  router.put("/permissions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const bodyData = req.body;
+
+      // 1. CAPTURAR EL TOKEN: Lo sacamos de los headers que envió tu EJS
+      const authHeader = req.headers.authorization;
+
+      console.log(`=> Reenviando PATCH a API externa para ID: ${id}`);
+
+      if (!authHeader) {
+        console.error(
+          "❌ ERROR: El Bridge no recibió ningún token del Frontend",
+        );
+      }
+
+      // 2. REENVIAR: Se lo pasamos explícitamente a la API externa
+      const response = await fetch(
+        `${URL_BASE_API_SEGURIDAD}/api/seguridad/permissions/${id}`,
+        {
+          method: "PATCH", // Cambiado a PATCH según tu Postman
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authHeader, // <--- AQUÍ ESTÁ LA CLAVE
+          },
+          body: JSON.stringify(bodyData),
+        },
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return res.json({ success: true, message: "Actualizado con éxito" });
+      } else {
+        // Si la API externa dice 403, devolvemos ese mismo error al front
+        console.error(" Error de la API de Seguridad Real:", data);
+        return res.status(response.status).json(data);
+      }
+    } catch (error) {
+      console.error(" Error en el Bridge:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Error interno del servidor" });
+    }
+  });
 
   router.delete("/permissions/:id", async (req, res) => {
     try {
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
       const { id } = req.params;
       const response = await fetch(
         `${URL_BASE_API_SEGURIDAD}/api/seguridad/permissions/${id}`,
@@ -542,7 +580,7 @@ router.put("/permissions/:id", async (req, res) => {
             "Content-Type": "application/json",
             ...(access_token && { Authorization: `Bearer ${access_token}` }),
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -575,7 +613,9 @@ router.put("/permissions/:id", async (req, res) => {
 
   router.put("/roles/:id", async (req, res) => {
     try {
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
       const { id } = req.params;
       const bodyData = req.body;
 
@@ -588,7 +628,7 @@ router.put("/permissions/:id", async (req, res) => {
             ...(access_token && { Authorization: `Bearer ${access_token}` }),
           },
           body: JSON.stringify(bodyData),
-        }
+        },
       );
 
       if (response.ok) {
@@ -616,7 +656,9 @@ router.put("/permissions/:id", async (req, res) => {
 
   router.delete("/roles/:id", async (req, res) => {
     try {
-      const access_token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.access_token;
+      const access_token =
+        req.headers.authorization?.replace("Bearer ", "") ||
+        req.cookies.access_token;
       const { id } = req.params;
       const response = await fetch(
         `${URL_BASE_API_SEGURIDAD}/api/seguridad/roles/${id}`,
@@ -626,7 +668,7 @@ router.put("/permissions/:id", async (req, res) => {
             "Content-Type": "application/json",
             ...(access_token && { Authorization: `Bearer ${access_token}` }),
           },
-        }
+        },
       );
 
       if (response.ok) {

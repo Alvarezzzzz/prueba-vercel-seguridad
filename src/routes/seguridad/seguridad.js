@@ -48,6 +48,20 @@ export const createSeguridadRouter = () => {
 
   router.get("/usuarios/editar/:id", async (req, res) => {
     const { id } = req.params;
+    // // hace un get para comprobar si el usuario existe
+    // const access_token = req.cookies.access_token || null;
+    // const resp = await fetch(`${apiUrl}/api/seguridad/users/${id}`, {
+    //   method: "GET",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     ...(access_token && { Authorization: `Bearer ${access_token}` }),
+    //   },
+    // });
+    // if (!resp.ok && resp.status === 404) {
+    //   return res
+    //     .status(404)
+    //     .render("seguridad/errors/404", { message: "Usuario no encontrado" });
+    // }
     res.render("seguridad/editarUsuario", { userId: id });
   });
 

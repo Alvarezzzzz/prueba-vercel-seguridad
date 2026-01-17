@@ -271,9 +271,9 @@
                 coordenadasExistentes = data;
 
                 // Cargar valores en los inputs
-                if (data.latitude && data.longitude) {
+                if (data.latitude && data.longitud) {
                     latInicial = parseFloat(data.latitude);
-                    lngInicial = parseFloat(data.longitude);
+                    lngInicial = parseFloat(data.longitud);
                     inputLat.value = latInicial.toFixed(6);
                     inputLng.value = lngInicial.toFixed(6);
                     
@@ -284,14 +284,14 @@
                     map.setView([latInicial, lngInicial], 13);
                 }
 
-                if (data.deliveryRadius) {
-                    radioInicial = parseFloat(data.deliveryRadius);
+                if (data.radius) {
+                    radioInicial = parseFloat(data.radius);
                     inputRadio.value = radioInicial;
                     circulo.setRadius(radioInicial * 1000);
                 }
 
                 // Buscar dirección si hay coordenadas
-                if (data.latitude && data.longitude) {
+                if (data.latitude && data.longitud) {
                     obtenerNombreDireccion(latInicial, lngInicial);
                 }
             } catch (error) {
@@ -316,8 +316,8 @@
 
             const body = {
                 latitude: lat,
-                longitude: lng,
-                deliveryRadius: radio
+                longitud: lng,
+                radius: radio
             };
 
             try {
