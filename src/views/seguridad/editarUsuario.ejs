@@ -75,6 +75,11 @@
                             <input type="text" id="inputDireccion">
                             <span class="error-message text-red-500 text-sm hidden"></span>
                         </div>
+                        <div class="grupo">
+                            <label>Nueva contraseña</label>
+                            <input type="password" id="inputNuevaContrasena" placeholder="Dejar en blanco para mantener la actual">
+                            <span class="error-message text-red-500 text-sm hidden"></span>
+                        </div>
 
                         <div class="grupo">
                             <label>Tipo de Usuario</label>
@@ -401,6 +406,7 @@
                 const direccion = document.getElementById('inputDireccion').value.trim();
                 const dataType = document.getElementById('selectDataType').value;
                 const isActive = document.getElementById('inputIsActive').checked;
+                const newPassword = document.getElementById('inputNuevaContrasena').value;
 
                 const body = {
                     name: nombre,
@@ -417,6 +423,9 @@
                 if (rolesSeleccionados.length > 0) {
                     body.roles = rolesSeleccionados.map(r => r.id);
                 }
+                if (newPassword && newPassword.trim() !== '') {
+                    body.password = newPassword;
+                }
 
                 try {
                     btnGuardar.disabled = true;
@@ -431,11 +440,18 @@
 
                     if (!response.ok) {
                         // Manejar errores de validación
+                        console.error('Error actualizando usuario:', data);
                         if (data.errors && Array.isArray(data.errors)) {
                             data.errors.forEach(error => {
-                                const inputId = `input${error.path.charAt(0).toUpperCase() + error.path.slice(1)}`;
-                                mostrarError(inputId, error.message);
+                                if (error.path === 'password') {
+                                    mostrarError('inputNuevaContrasena', error.message);
+                                } else {
+                                    const inputId = `input${error.path.charAt(0).toUpperCase() + error.path.slice(1)}`;
+                                    mostrarError(inputId, error.message);
+                                }
                             });
+                            const errorMsg = data.message || response.statusText || 'Error al actualizar el usuario';
+                            notyf.error(errorMsg);
                         } else {
                             const errorMsg = data.message || response.statusText || 'Error al actualizar el usuario';
                             notyf.error(errorMsg);
