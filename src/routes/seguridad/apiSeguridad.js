@@ -53,6 +53,37 @@ export const createApiSeguridadRouter = () => {
     }
   });
 
+router.post("/auth/passwordChange", async (req, res) => {
+    try {
+        const access_token = req.headers.authorization?.replace("Bearer ", "") || req.cookies.access_token;
+        const { current_password, new_password } = req.body;
+
+        if (!new_password || !/^[a-zA-Z0-9$@.*]{8,}$/.test(new_password)) {
+            return res.status(400).json({ success: false, message: " La contraseña debe tener al menos 8 caracteres y/o sólo contener letras, números y/o símbolos $ @ . * " });
+        }
+
+        const response = await fetch(`${URL_BASE_API_SEGURIDAD}/api/seguridad/auth/passwordChange`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${access_token}`
+            },
+            body: JSON.stringify({ current_password, new_password })
+        });
+
+        const data = await response.json();
+
+    
+        return res.status(response.status).json(data);
+
+    } catch (error) {
+        console.error("Error en el bridge:", error);
+        if (!res.headersSent) {
+            return res.status(500).json({ success: false, message: "Error de comunicación con el servicio" });
+        }
+    }
+});
+
   router.get("/roles", async (req, res) => {
     try {
       const { page = 1, limit = 12, search = "" } = req.query;
