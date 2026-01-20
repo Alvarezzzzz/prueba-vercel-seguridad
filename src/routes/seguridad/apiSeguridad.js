@@ -770,7 +770,7 @@ router.post("/auth/passwordChange", async (req, res) => {
 
       // Llamar al endpoint 6 de User (PATCH /api/seguridad/users/{id})
       const response = await fetch(
-        `${URL_BASE_API_SEGURIDAD}/api/seguridad/users/${userId}`,
+        `${URL_BASE_API_SEGURIDAD}/api/seguridad/users`,
         {
           method: "PATCH",
           headers: {
